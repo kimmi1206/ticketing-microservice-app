@@ -1,34 +1,16 @@
-import express from 'express';
-import 'express-async-errors';
-import { json } from 'body-parser';
 import mongoose from 'mongoose';
-
-import { currentUserRouter } from './routes/current-user';
-import { signinRouter } from './routes/signin';
-import { signoutRouter } from './routes/signout';
-import { signupRouter } from './routes/signup';
-
-import { errorHandler } from './middlewares/error-handler';
-import { NotFoundError } from './errors/not-found-error';
-
-const app = express();
-app.use(json());
-
-app.use(currentUserRouter);
-app.use(signinRouter);
-app.use(signoutRouter);
-app.use(signupRouter);
-
-app.use(errorHandler);
-
-app.all('*', async (req, res, next) => {
-  // app.all('*', async (req, res) => {
-  // throw new NotFoundError();
-  next(new NotFoundError());
-});
+import { app } from './app';
 
 const start = async () => {
+  // only for local testing
+  process.env.JWT_KEY = 'mysecretkey_for-testing_in_dev-env'; // only for local testing in dev environment
+
+  if (!process.env.JWT_KEY) {
+    //ew Error('JWT_KEY must be defined');
+  }
+
   try {
+    // for testing locally
     await mongoose.connect('mongodb://localhost:27017/auth', {
       // await mongoose.connect('mongodb://auth-mongo-srv:27017/auth', {
       useNewUrlParser: true,

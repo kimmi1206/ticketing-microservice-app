@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  auth-depl
+  name: auth-depl
 spec:
   replicas: 1
   selector:
@@ -10,12 +10,18 @@ spec:
   template:
     metadata:
       labels:
-        app:  auth
+        app: auth
     spec:
       containers:
         - name: auth
           image: kimmi1206/auth
-          imagePullPolicy: Never
+          imagePullPolicy: Never # for local testing
+          env:
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
 ---
 apiVersion: v1
 kind: Service
@@ -25,7 +31,7 @@ spec:
   selector:
     app: auth-srv
   ports:
-  - name: auth
-    protocol: TCP
-    port: 3000
-    targetPort: 3000
+    - name: auth
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

@@ -1,7 +1,10 @@
 import express, { Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
-import { RequestValidationError } from '../errors/request-validation-error';
-import { DatabaseConnectionError } from '../errors/database-connection-error';
+import { body } from 'express-validator';
+import jwt from 'jsonwebtoken';
+
+import { User } from '../models/user';
+import { validateRequest } from '../middlewares/validate-request';
+import { BadRequestError } from '../errors/bad-request-error';
 
 const router = express.Router();
 
@@ -25,23 +28,34 @@ router.post(
     //   })
     //   .withMessage('Passwords do not match'),
   ],
+  validateRequest,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      throw new RequestValidationError(errors.array());
-
-      //  --other examples
-      // return res.status(400).json({ errors: errors.array() });
-      //return res.status(400).send(errors.array());
-      // const error = new Error('Invalid Email or Password');
-      // error.reasons = errors.array();
-      // throw error;
-    }
     const { email, password } = req.body;
-    console.log('Creating user with email: ' + email);
-    throw new DatabaseConnectionError();
 
-    res.send({});
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      // console.log('Email already in use');
+      // return res.send({});
+      throw new BadRequestError('Email already in use');
+    }
+
+    const user = User.build({ email, password });
+    await user.save();
+
+    // Generate JWT
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_KEY! // exclamation (Non-Null Assertion) indicates totypescript to  ignore undefined or null types
+    );
+
+    // Store it on session object
+    req.session = { jwt: userJwt };
+
+    res.status(201).send(user);
   }
 );
 
