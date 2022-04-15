@@ -6,7 +6,7 @@ const start = async () => {
   process.env.JWT_KEY = 'mysecretkey_for-testing_in_dev-env'; // only for local testing in dev environment
 
   if (!process.env.JWT_KEY) {
-    //ew Error('JWT_KEY must be defined');
+    throw new Error('JWT_KEY must be defined');
   }
 
   try {
