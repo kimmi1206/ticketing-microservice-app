@@ -18,7 +18,7 @@ app.use(
   cookieSession({
     signed: false,
     secure: false, // only for testing locally
-    // secure: true,
+    // secure: process.env.NODE_ENV !== 'test',
   })
 );
 
