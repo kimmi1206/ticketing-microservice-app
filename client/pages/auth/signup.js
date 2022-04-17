@@ -8,10 +8,15 @@ export default () => {
   const onSubmit = async (event) => {
     event.preventDefault();
 
-    const response = await axios.post('/api/users/signup', {
-      email,
-      password,
-    });
+    // const response = await axios.post('api/users/signup', {
+    // for local testing
+    const response = await axios.post(
+      'http://localhost:3001/api/users/signup',
+      {
+        email,
+        password,
+      }
+    );
 
     console.log(response.data);
   };
