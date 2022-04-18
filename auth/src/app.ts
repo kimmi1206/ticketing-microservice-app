@@ -19,8 +19,8 @@ app.use(cors());
 app.use(
   cookieSession({
     signed: false,
-    secure: false, // only for testing locally
-    // secure: process.env.NODE_ENV !== 'test',
+    // secure: false, // only for testing locally
+    secure: process.env.NODE_ENV !== 'test',
   })
 );
 
@@ -31,10 +31,10 @@ app.use(signupRouter);
 
 app.use(errorHandler);
 
-app.all('*', async (req, res, next) => {
-  // app.all('*', async (req, res) => { // alternative
-  // throw new NotFoundError();
-  next(new NotFoundError());
+// app.all('*', async (req, res, next) => {
+app.all('*', async (req, res) => {
+  throw new NotFoundError();
+  // next(new NotFoundError()); // alternative
 });
 
 export { app };

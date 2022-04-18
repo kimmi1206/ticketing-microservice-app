@@ -11,8 +11,8 @@ const start = async () => {
 
   try {
     // for testing locally
-    await mongoose.connect('mongodb://localhost:27017/auth', {
-      // await mongoose.connect('mongodb://auth-mongo-srv:27017/auth', {
+    // await mongoose.connect('mongodb://localhost:27017/auth', {
+    await mongoose.connect('mongodb://auth-mongo-srv:27017/auth', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
@@ -22,11 +22,8 @@ const start = async () => {
   } catch (err) {
     console.log(err);
   }
-  // app.listen(3000, () => {
-  // for local testing
-  app.listen(3001, () => {
-    console.log('Listening on port 3001!');
-    // console.log('Listening on port 3000!');
+  app.listen(3000, () => {
+    console.log('Listening on port 3000!');
   });
 };
 
