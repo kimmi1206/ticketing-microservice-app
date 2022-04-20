@@ -26,3 +26,11 @@ build:
           - src: '**/*.js'
             # "\"**/*.js\""
             dest: .
+    - image: kimmi1206/tickets
+      context: tickets
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
