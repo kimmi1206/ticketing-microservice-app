@@ -3,7 +3,7 @@ import { app } from './app';
 
 const start = async () => {
   // only for local testing
-  process.env.JWT_KEY = 'mysecretkey_for-testing_in_dev-env'; // only for local testing in dev environment
+  process.env.JWT_KEY = 'mysecretkeyfortestingindevenv'; // only for local testing in dev environment
   // process.env.MONGO_URI = 'mongodb://localhost:27017/tickets' // for testing locally
 
   if (!process.env.JWT_KEY) {
