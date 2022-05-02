@@ -1,0 +1,61 @@
+import request from 'supertest';
+import { app } from '../../app';
+import { Ticket } from '../../models/ticket';
+import { Order, OrderStatus } from '../../models/order';
+import { natsWrapper } from '../../nats-wrapper';
+
+it('marks an order as cancelled', async () => {
+  // create a ticket with Ticket model
+  const ticket = Ticket.build({
+    title: 'concert',
+    price: 20,
+  });
+  await ticket.save();
+
+  // make a request to create an order
+  const user = global.signup().toString();
+
+  const { body: order } = await request(app) // de-structure out body, rename it to -order-
+    .post('/api/orders')
+    .set('Cookie', user)
+    .send({ ticketId: ticket.id })
+    .expect(201);
+
+  // make a request to cancel the order
+  await request(app)
+    .delete(`/api/orders/${order.id}`)
+    .set('Cookie', user)
+    .send()
+    .expect(204);
+
+  // expectation to make sure the thing is cancelled
+  const updatedOrder = await Order.findById(order.id);
+
+  expect(updatedOrder!.status).toEqual(OrderStatus.Cancelled); // updatedOrder can be null is no order is found
+});
+
+it('emits an order cancelled event', async () => {
+  const ticket = Ticket.build({
+    title: 'concert',
+    price: 20,
+  });
+  await ticket.save();
+
+  // make a request to create an order
+  const user = global.signup().toString();
+
+  const { body: order } = await request(app) // de-structure out body, rename it to -order-
+    .post('/api/orders')
+    .set('Cookie', user)
+    .send({ ticketId: ticket.id })
+    .expect(201);
+
+  // make a request to cancel the order
+  await request(app)
+    .delete(`/api/orders/${order.id}`)
+    .set('Cookie', user)
+    .send()
+    .expect(204);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalled();
+});
