@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Order, OrderStatus } from './order';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface TicketAttrs {
   id: string;
@@ -10,14 +11,19 @@ interface TicketAttrs {
 export interface TicketDoc extends mongoose.Document {
   title: string;
   price: number;
+  version: number;
   isReserved(): Promise<boolean>;
 }
 
 interface TicketModel extends mongoose.Model<TicketDoc> {
   build(attrs: TicketAttrs): TicketDoc;
+  findByEvent(event: {
+    id: string;
+    version: number;
+  }): Promise<TicketDoc | null>;
 }
 
-const ticketSchemma = new mongoose.Schema(
+const ticketSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -39,7 +45,25 @@ const ticketSchemma = new mongoose.Schema(
   }
 );
 
-ticketSchemma.statics.build = (attrs: TicketAttrs) => {
+// adds plugins mongoose-update-if-current to the schema
+ticketSchema.set('versionKey', 'version');
+ticketSchema.plugin(updateIfCurrentPlugin);
+
+// // Middleware to update version number
+// ticketSchema.pre('save', function (done) {
+//   // use function keyword because of scope of -this-
+
+//   const incrementNumber = 1;
+//   // @ts-ignore
+//   this.$where = {
+//     // we can change the versioning increment
+//     version: this.get('version') - incrementNumber,
+//   };
+
+//   done();
+// });
+
+ticketSchema.statics.build = (attrs: TicketAttrs) => {
   return new Ticket({
     _id: attrs.id,
     title: attrs.title,
@@ -47,7 +71,14 @@ ticketSchemma.statics.build = (attrs: TicketAttrs) => {
   });
 };
 
-ticketSchemma.methods.isReserved = async function () {
+ticketSchema.statics.findByEvent = (event: { id: string; version: number }) => {
+  return Ticket.findOne({
+    _id: event.id,
+    version: event.version,
+  });
+};
+
+ticketSchema.methods.isReserved = async function () {
   // this === the ticket document that we just called 'isReserved' on
   // Find orders that have not been cancelled and that include this ticket
   const existingOrder = await Order.findOne({
@@ -63,6 +94,6 @@ ticketSchemma.methods.isReserved = async function () {
   return !!existingOrder; // !! converts to boolean, if there is an order, return true
 };
 
-const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchemma);
+const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchema);
 
 export { Ticket };
