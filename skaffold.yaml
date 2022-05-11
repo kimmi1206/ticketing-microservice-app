@@ -50,3 +50,11 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: kimmi1206/payments
+      context: payments
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
