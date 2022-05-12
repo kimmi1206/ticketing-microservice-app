@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 declare global {
-  var signup: () => string[] | Promise<string[]>;
+  var signup: (id?: string) => string[] | Promise<string[]>;
 }
 
 // declare global {
@@ -17,6 +17,9 @@ declare global {
 jest.mock('../nats-wrapper');
 
 let mongo: any;
+
+process.env.STRIPE_KEY =
+  'sk_test_51KygVaFq2GdszQ25VEaSlSs465j01Yq5p6TPjLxPCctJnzdKbKjgKVMLLxW4X7w4oc3cjiu2xmg7GEkstSZCiWsx00J8sBWmDk';
 
 // hook function that runs before all tests
 beforeAll(async () => {
@@ -48,10 +51,10 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-global.signup = async () => {
+global.signup = async (id?: string) => {
   // Build JWT payload { id, email }
   const payload = {
-    id: new mongoose.Types.ObjectId().toHexString(),
+    id: id || new mongoose.Types.ObjectId().toHexString(),
     email: 'test@test.com',
   };
 
