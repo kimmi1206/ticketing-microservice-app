@@ -6,7 +6,9 @@ import { Ticket } from '../models/ticket';
 const router = express.Router();
 
 router.get('/api/tickets', async (req: Request, res: Response) => {
-  const tickets = Ticket.find({}); // empty object can be used for filtering
+  const tickets = Ticket.find({
+    orderId: undefined,
+  }); // empty object can be used for filtering
 
   res.send(tickets);
 });
