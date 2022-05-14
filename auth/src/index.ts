@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { app } from './app';
 
 const start = async () => {
+  //
   // only for local testing
   process.env.JWT_KEY = 'mysecretkeyfortestingindevenv'; // only for local testing in dev environment
   // process.env.MONGO_URI = 'mongodb://localhost:27017/auth' // for testing locally
